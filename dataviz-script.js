@@ -46,7 +46,7 @@ function setupStickyHeader() {
         
         switch(action) {
             case 'about':
-                alert('About: "It\'s Been A Day" is a website that collects and displays the best and worst moments of people\'s days.');
+                alert('It\'s Been A Day is a website that collects and displays the best and worst moments of people\'s days. Share your day via the submit button! :)');
                 break;
             case 'submit':
                 window.location.href = 'form.html';
