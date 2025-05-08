@@ -1,21 +1,15 @@
-// Modified collection-script.js with sorting functionality
-
-// Google Sheets API constants - use the same as in script.js
 const SPREADSHEET_ID = '1C-iegnutKxu5hfmqd07HA5081Ie_pfdxc0a-B_7jezI';
 const API_KEY = 'AIzaSyCJ0TaH0vypcPDs9vXUbobqXaHfc_AlnmI';
 const SHEET_RANGE = 'Sheet1!A2:F';
 
-// Global variable to store the data for sorting
 let collectionData = [];
 
-// Sort states for toggle functionality
 const sortState = {
-    date: 'newest', // 'none', 'newest', 'oldest' - Changed default to 'newest'
-    bestRating: 'none', // 'none', 'highest', 'lowest'
-    worstRating: 'none' // 'none', 'highest', 'lowest'
+    date: 'newest',
+    bestRating: 'none',
+    worstRating: 'none'
 };
 
-// Function to parse date from Google Sheets (expected format: MM/DD/YYYY HH:MM:SS)
 function parseSheetDate(dateString) {
     if (!dateString) return { date: formatDate(), time: formatTime() };
     
@@ -23,19 +17,17 @@ function parseSheetDate(dateString) {
         const parts = dateString.split(' ');
         if (parts.length >= 2) {
             return {
-                date: parts[0], // MM/DD/YYYY
-                time: parts[1]  // HH:MM:SS
+                date: parts[0],
+                time: parts[1]
             };
         }
     } catch (e) {
         console.error('Error parsing date:', e);
     }
     
-    // Fallback to current date/time
     return { date: formatDate(), time: formatTime() };
 }
 
-// Function to format the current date in MM/DD/YYYY format
 function formatDate() {
     const now = new Date();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -44,7 +36,6 @@ function formatDate() {
     return `${month}/${day}/${year}`;
 }
 
-// Function to format the current time in HH:MM:SS format
 function formatTime() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
@@ -53,7 +44,6 @@ function formatTime() {
     return `${hours}:${minutes}:${seconds}`;
 }
 
-// Function to load data from Google Sheets and populate the index table
 function loadIndexData() {
     const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_RANGE}?key=${API_KEY}`;
     
@@ -71,11 +61,9 @@ function loadIndexData() {
         .then(data => {
             const rows = data.values || [];
             
-            // Process the data and store for sorting
             collectionData = [];
             
             rows.forEach(row => {
-                // Check if we have a proper row with enough elements
                 if (row && row.length >= 5) {
                     const dateTimeObj = parseSheetDate(row[0] || '');
                     const location = row.length >= 6 ? row[5] : "UNKNOWN";
@@ -84,9 +72,7 @@ function loadIndexData() {
                     const worstMoment = row[3] || '';
                     const worstRating = parseInt(row[4]) || 3;
                     
-                    // Only create a row if we have at least one of best or worst moment
                     if (bestMoment.trim() !== '' || worstMoment.trim() !== '') {
-                        // Store the data for sorting
                         collectionData.push({
                             dateString: row[0] || '',
                             dateObj: new Date(dateTimeObj.date + ' ' + dateTimeObj.time),
@@ -102,25 +88,20 @@ function loadIndexData() {
                 }
             });
             
-            // Render the table with default sorting (newest first)
             renderTable();
         })
         .catch(error => {
             console.error('Error fetching data from Google Sheets:', error);
-            // Fallback to mock data if API fails
             useMockData();
         });
 }
 
-// Function to render the table based on current sort state
 function renderTable() {
     const tableBody = document.getElementById('index-entries');
-    tableBody.innerHTML = ''; // Clear existing entries
+    tableBody.innerHTML = '';
     
-    // Apply sorting based on current state
     sortData();
     
-    // If no data was found, display a message
     if (collectionData.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
@@ -133,20 +114,16 @@ function renderTable() {
         return;
     }
     
-    // Add data to the table
     collectionData.forEach(entry => {
         const tr = document.createElement('tr');
         
-        // Add combined date, time, and location cell
         const metadataCell = document.createElement('td');
         
-        // Create date and time div
         const dateTimeDiv = document.createElement('div');
         dateTimeDiv.className = 'date-time';
         dateTimeDiv.textContent = `${entry.dateFormatted}, ${entry.timeFormatted}`;
         metadataCell.appendChild(dateTimeDiv);
         
-        // Create location div
         const locationDiv = document.createElement('div');
         locationDiv.className = 'location';
         locationDiv.textContent = entry.location;
@@ -154,20 +131,17 @@ function renderTable() {
         
         tr.appendChild(metadataCell);
         
-        // Add best moment cell
         const bestCell = document.createElement('td');
         if (entry.bestMoment.trim() !== '') {
             const bestDiv = document.createElement('div');
             bestDiv.className = 'best-moment';
             bestDiv.setAttribute('data-rating', entry.bestRating);
             
-            // Create rating badge first
             const ratingBadge = document.createElement('span');
             ratingBadge.className = 'rating-badge rating-badge-front';
             ratingBadge.textContent = `${entry.bestRating}/5`;
             bestDiv.appendChild(ratingBadge);
             
-            // Add a text node after the badge for the best moment content
             const textNode = document.createTextNode(entry.bestMoment);
             bestDiv.appendChild(textNode);
             
@@ -175,20 +149,17 @@ function renderTable() {
         }
         tr.appendChild(bestCell);
         
-        // Add worst moment cell
         const worstCell = document.createElement('td');
         if (entry.worstMoment.trim() !== '') {
             const worstDiv = document.createElement('div');
             worstDiv.className = 'worst-moment';
             worstDiv.setAttribute('data-rating', entry.worstRating);
             
-            // Create rating badge first
             const ratingBadge = document.createElement('span');
             ratingBadge.className = 'rating-badge rating-badge-front';
             ratingBadge.textContent = `${entry.worstRating}/5`;
             worstDiv.appendChild(ratingBadge);
             
-            // Add a text node after the badge for the worst moment content
             const textNode = document.createTextNode(entry.worstMoment);
             worstDiv.appendChild(textNode);
             
@@ -196,55 +167,47 @@ function renderTable() {
         }
         tr.appendChild(worstCell);
         
-        // Add the row to the table
         tableBody.appendChild(tr);
     });
 }
 
-// Function to sort the data based on current sort state
 function sortData() {
-    // Sort by date if active
     if (sortState.date !== 'none') {
         collectionData.sort((a, b) => {
             if (sortState.date === 'newest') {
-                return b.dateObj - a.dateObj; // Newest first
+                return b.dateObj - a.dateObj;
             } else {
-                return a.dateObj - b.dateObj; // Oldest first
+                return a.dateObj - b.dateObj;
             }
         });
     }
     
-    // Sort by best rating if active
     if (sortState.bestRating !== 'none') {
         collectionData.sort((a, b) => {
             if (sortState.bestRating === 'highest') {
-                return b.bestRating - a.bestRating; // Highest first
+                return b.bestRating - a.bestRating;
             } else {
-                return a.bestRating - b.bestRating; // Lowest first
+                return a.bestRating - b.bestRating;
             }
         });
     }
     
-    // Sort by worst rating if active
     if (sortState.worstRating !== 'none') {
         collectionData.sort((a, b) => {
             if (sortState.worstRating === 'highest') {
-                return b.worstRating - a.worstRating; // Highest first
+                return b.worstRating - a.worstRating;
             } else {
-                return a.worstRating - b.worstRating; // Lowest first
+                return a.worstRating - b.worstRating;
             }
         });
     }
 }
 
-// Function to toggle sorting
 function toggleSort(sortType) {
-    // Reset all sort states except the one being toggled
     if (sortType !== 'date') sortState.date = 'none';
     if (sortType !== 'bestRating') sortState.bestRating = 'none';
     if (sortType !== 'worstRating') sortState.worstRating = 'none';
     
-    // Toggle the selected sort state
     if (sortType === 'date') {
         if (sortState.date === 'none' || sortState.date === 'oldest') {
             sortState.date = 'newest';
@@ -265,21 +228,15 @@ function toggleSort(sortType) {
         }
     }
     
-    // Update UI to show active sort
     updateSortUI();
-    
-    // Re-render the table with the new sorting
     renderTable();
 }
 
-// Function to update the sort buttons UI
 function updateSortUI() {
-    // Reset all button states
     document.querySelectorAll('.sort-button').forEach(button => {
         button.classList.remove('sort-active', 'sort-asc', 'sort-desc');
     });
     
-    // Update date sort button
     if (sortState.date !== 'none') {
         const dateButton = document.querySelector('[data-sort="date"]');
         dateButton.classList.add('sort-active');
@@ -292,7 +249,6 @@ function updateSortUI() {
         }
     }
     
-    // Update best rating sort button
     if (sortState.bestRating !== 'none') {
         const bestButton = document.querySelector('[data-sort="bestRating"]');
         bestButton.classList.add('sort-active');
@@ -305,7 +261,6 @@ function updateSortUI() {
         }
     }
     
-    // Update worst rating sort button
     if (sortState.worstRating !== 'none') {
         const worstButton = document.querySelector('[data-sort="worstRating"]');
         worstButton.classList.add('sort-active');
@@ -319,7 +274,6 @@ function updateSortUI() {
     }
 }
 
-// Fallback mock data in case the API fails
 function useMockData() {
     const mockData = [
         {
@@ -378,7 +332,6 @@ function useMockData() {
         }
     ];
     
-    // Convert mock data to our collectionData format
     collectionData = mockData.map(entry => {
         return {
             dateString: `${entry.date} ${entry.time}`,
@@ -393,13 +346,10 @@ function useMockData() {
         };
     });
     
-    // Render the table with default sorting
     renderTable();
 }
 
-// Function to set up the sticky header navigation
 function setupStickyHeader() {
-    // Set up the pill position based on active nav item
     function updatePill() {
         const $activeItem = $('.nav-item.active');
         const position = $activeItem.position();
@@ -411,21 +361,16 @@ function setupStickyHeader() {
         });
     }
     
-    // Initialize pill position on page load
     updatePill();
     
-    // Handle navigation item clicks
     $('.nav-item').click(function() {
         const page = $(this).data('page');
         
-        // Update active class
         $('.nav-item').removeClass('active');
         $(this).addClass('active');
         
-        // Update pill position
         updatePill();
         
-        // Handle page navigation
         switch(page) {
             case 'paired':
                 window.location.href = 'index.html';
@@ -439,7 +384,6 @@ function setupStickyHeader() {
         }
     });
     
-    // Handle action button clicks
     $('.action-button').click(function() {
         const action = $(this).data('action');
         
@@ -453,21 +397,14 @@ function setupStickyHeader() {
         }
     });
     
-    // Handle sort button clicks
     $('.sort-button').click(function() {
         const sortType = $(this).data('sort');
         toggleSort(sortType);
     });
 }
 
-// Initialize on document ready
 $(document).ready(function() {
-    // Setup sticky header navigation
     setupStickyHeader();
-    
-    // Set initial sort state UI to match the default (newest first)
     updateSortUI();
-    
-    // Load and display index data
     loadIndexData();
 });

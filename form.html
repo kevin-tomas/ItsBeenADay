@@ -24,7 +24,6 @@
             background-color: #f5f5f5;
         }
 
-        /* Sticky header styles */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -247,7 +246,6 @@
             background-color: #e8f4ff;
         }
 
-        /* Result message */
         #result-message {
             margin-top: 20px;
             padding: 10px;
@@ -266,7 +264,6 @@
             border: 1px dotted #000;
         }
 
-        /* Animation */
         @keyframes pulse {
             0% {
                 transform: scale(0.95);
@@ -296,7 +293,6 @@
             vertical-align: middle;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .form-content {
                 flex-direction: column;
@@ -329,7 +325,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
-    <!-- Sticky header -->
     <header class="sticky-header">
         <h1 class="site-title">It's Been A Day</h1>
         <div class="navigation">
@@ -346,7 +341,6 @@
         </div>
     </header>
     
-    <!-- Form container -->
     <div class="form-container">
         <div class="form-header">
             <h2>Tell Us About Your Day</h2>
@@ -354,7 +348,6 @@
         
         <form id="day-form">
             <div class="form-content">
-                <!-- Best part of the day -->
                 <div class="form-half left">
                     <div class="gradient-animation"></div>
                     <div class="form-group">
@@ -388,7 +381,6 @@
                     </div>
                 </div>
                 
-                <!-- Worst part of the day -->
                 <div class="form-half right">
                     <div class="gradient-animation"></div>
                     <div class="form-group">
@@ -423,7 +415,6 @@
                 </div>
             </div>
             
-            <!-- Location field - shared for both -->
             <div style="padding: 0 30px 20px;">
                 <div class="form-group">
                     <label style="margin-top: 20px; margin-bottom: 20px">LOCATION (OPTIONAL) <br> Format: <br> City, State/Country Abbrevation</label>
@@ -431,7 +422,6 @@
                 </div>
             </div>
             
-            <!-- Hidden fields to store the ratings -->
             <input type="hidden" name="How good was it?" id="best_rating" value="3">
             <input type="hidden" name="How bad was it...?" id="worst_rating" value="3">
             
@@ -443,10 +433,8 @@
     </div>
 
     <script>
-        // Google Apps Script Web App URL
         const scriptURL = 'https://script.google.com/macros/s/AKfycby0o2mMlPKhRu1QL54erpM4qQtNowCknC28md3JAz5L0xts0h8c_IBKFbulkX4i8U7aYQ/exec';
         
-        // Function to format the current date and time in MM/DD/YYYY HH:MM:SS format
         function formatDateTime() {
             const now = new Date();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -458,9 +446,7 @@
             return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
         }
         
-        // Set up the sticky header navigation
         function setupStickyHeader() {
-            // Set up the pill position based on active nav item
             function updatePill() {
                 const $activeItem = $('.action-button.active').length 
                     ? $('.action-button.active') 
@@ -480,21 +466,16 @@
                 }
             }
             
-            // Initialize pill position on page load
             updatePill();
             
-            // Handle navigation item clicks
             $('.nav-item').click(function() {
                 const page = $(this).data('page');
                 
-                // Update active class
                 $('.nav-item').removeClass('active');
                 $(this).addClass('active');
                 
-                // Update pill position
                 updatePill();
                 
-                // Handle page navigation
                 switch(page) {
                     case 'paired':
                         window.location.href = 'index.html';
@@ -508,7 +489,6 @@
                 }
             });
             
-            // Handle action button clicks
             $('.action-button').click(function() {
                 const action = $(this).data('action');
                 
@@ -525,18 +505,14 @@
             });
         }
         
-        // Set up the rating selectors
         function setupRatingSelectors() {
-            // Set default ratings (3)
             $('.rating-option[data-rating="3"][data-type="best"] .rating-circle').addClass('selected-best');
             $('.rating-option[data-rating="3"][data-type="worst"] .rating-circle').addClass('selected-worst');
             
-            // Handle rating selection
             $('.rating-option').click(function() {
                 const rating = $(this).data('rating');
                 const type = $(this).data('type');
                 
-                // Update the hidden field
                 if (type === 'best') {
                     $('#best_rating').val(rating);
                     $('.rating-option[data-type="best"] .rating-circle').removeClass('selected-best');
@@ -549,24 +525,19 @@
             });
         }
         
-        // Append data to the Google Sheet
         function appendToSheet(data) {
-            // Show loading state in the result message
             $('#result-message').html('<span class="loading"></span> Processing...').removeClass('success').removeClass('error').show();
             
             console.log('Submitting data to script URL:', scriptURL);
             console.log('Form data:', data);
             
-            // Format the data as FormData
             const formData = new FormData();
             
-            // Add fields in the correct order matching your spreadsheet
             Object.keys(data).forEach(key => {
                 formData.append(key, data[key]);
                 console.log(`Adding to FormData: ${key} = ${data[key]}`);
             });
             
-            // Make the fetch request to the Google Apps Script Web App
             return fetch(scriptURL, {
                 method: 'POST',
                 body: formData
@@ -597,19 +568,14 @@
             });
         }
         
-        // Initialize on document ready
         $(document).ready(function() {
-            // Set up sticky header navigation
             setupStickyHeader();
             
-            // Set up rating selectors
             setupRatingSelectors();
             
-            // Form submission handler
             $('#day-form').on('submit', function(e) {
                 e.preventDefault();
                 
-                // Get form data
                 const formData = {
                     'What was the best part of your': $('#best-moment').val().trim(),
                     'How good was it?': $('#best_rating').val(),
@@ -618,35 +584,29 @@
                     'Where are you located?': $('#location').val().trim() || "UNKNOWN"
                 };
                 
-                // Validate form
                 if (!formData['What was the best part of your'] || !formData['What was the worst part of your day?']) {
                     $('#result-message').html('Please fill out both the best and worst parts of your day.').removeClass('success').addClass('error').show();
                     return;
                 }
                 
-                // Show loading state
                 const submitButton = $('#submit-button');
                 const originalText = submitButton.text();
                 submitButton.html('<span class="loading"></span> SUBMITTING...');
                 submitButton.prop('disabled', true);
                 
-                // Submit data to Google Sheet
                 appendToSheet(formData)
                     .then(response => {
                         console.log('Success:', response);
                         $('#result-message').html('Your day has been submitted successfully!').removeClass('error').addClass('success').show();
                         
-                        // Reset form
                         $('#day-form')[0].reset();
                         
-                        // Reset ratings to default (3)
                         $('.rating-option .rating-circle').removeClass('selected-best').removeClass('selected-worst');
                         $('.rating-option[data-rating="3"][data-type="best"] .rating-circle').addClass('selected-best');
                         $('.rating-option[data-rating="3"][data-type="worst"] .rating-circle').addClass('selected-worst');
                         $('#best_rating').val(3);
                         $('#worst_rating').val(3);
                         
-                        // Hide success message after 5 seconds
                         setTimeout(() => {
                             $('#result-message').fadeOut();
                         }, 5000);
@@ -656,13 +616,11 @@
                         $('#result-message').html(`Error submitting your day: ${error.message}<br><small>Check browser console for details (F12)</small>`).removeClass('success').addClass('error').show();
                     })
                     .finally(() => {
-                        // Reset button state
                         submitButton.html(originalText);
                         submitButton.prop('disabled', false);
                     });
             });
             
-            // Add hover effects for the form halves
             $('.form-half').hover(
                 function() {
                     $(this).find('.gradient-animation').css('opacity', 0.5);

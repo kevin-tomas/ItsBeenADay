@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
-    <!-- Sticky header (duplicated from other pages) -->
     <header class="sticky-header">
         <h1 class="site-title">It's Been A Day</h1>
         <div class="navigation">
@@ -34,19 +33,14 @@
     </div>
 
     <script>
-    // Simple check to ensure tooltips work
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, checking if tooltip functionality is initialized');
         setTimeout(function() {
             const tooltips = document.querySelectorAll('.best-bubble, .worst-bubble');
-            console.log(`Found ${tooltips.length} bubbles to check`);
             
             tooltips.forEach(bubble => {
                 const hasListeners = bubble.getAttribute('data-listeners-added');
                 if (!hasListeners) {
-                    console.log(`Adding event listeners to bubble: ${bubble.className}`);
                     bubble.addEventListener('mouseenter', function(e) {
-                        console.log(`Hover on ${bubble.className}: ${bubble.dataset.content}`);
                         const tooltip = document.querySelector('.bubble-tooltip');
                         if (tooltip) {
                             tooltip.innerHTML = `
@@ -80,7 +74,7 @@
                     bubble.setAttribute('data-listeners-added', 'true');
                 }
             });
-        }, 1000); // Wait for bubbles to be created
+        }, 1000);
     });
     </script>
     

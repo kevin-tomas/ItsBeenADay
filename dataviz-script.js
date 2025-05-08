@@ -1,6 +1,5 @@
 // Function to set up the sticky header navigation
 function setupStickyHeader() {
-    // Set up the pill position based on active nav item
     function updatePill() {
         const $activeItem = $('.nav-item.active');
         const position = $activeItem.position();
@@ -12,21 +11,16 @@ function setupStickyHeader() {
         });
     }
     
-    // Initialize pill position on page load
     updatePill();
     
-    // Handle navigation item clicks
     $('.nav-item').click(function() {
         const page = $(this).data('page');
         
-        // Update active class
         $('.nav-item').removeClass('active');
         $(this).addClass('active');
         
-        // Update pill position
         updatePill();
         
-        // Handle page navigation
         switch(page) {
             case 'paired':
                 window.location.href = 'index.html';
@@ -40,7 +34,6 @@ function setupStickyHeader() {
         }
     });
     
-    // Handle action button clicks
     $('.action-button').click(function() {
         const action = $(this).data('action');
         
@@ -55,14 +48,11 @@ function setupStickyHeader() {
     });
 }
 
-// Handle window resize
 function handleResize() {
-    // Cancel existing animation
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
     }
     
-    // Recalculate positions and restart animation
     const bubbles = document.querySelectorAll('.best-bubble, .worst-bubble');
     const bestContainer = document.getElementById('best-bubbles-canvas');
     const worstContainer = document.getElementById('worst-bubbles-canvas');
@@ -71,74 +61,57 @@ function handleResize() {
         const container = bubble.classList.contains('best-bubble') ? bestContainer : worstContainer;
         const size = parseFloat(bubble.dataset.size);
         
-        // New random position within container
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         
         const leftPos = Math.random() * (containerWidth - size);
         const topPos = Math.random() * (containerHeight - size);
         
-        // Update positions and velocities
         bubble.style.left = `${leftPos}px`;
         bubble.style.top = `${topPos}px`;
         bubble.dataset.posX = leftPos;
         bubble.dataset.posY = topPos;
         
-        // Give new random velocities
         const speedFactor = BUBBLE_SPEED_MIN + Math.random() * (BUBBLE_SPEED_MAX - BUBBLE_SPEED_MIN);
         bubble.dataset.velX = (Math.random() * 2 - 1) * speedFactor;
         bubble.dataset.velY = (Math.random() * 2 - 1) * speedFactor;
     });
     
-    // Update stats overlay
     createStatsOverlay();
     
-    // Restart animation
     startFloatingAnimation();
 }
 
-// Initialize on document ready
 $(document).ready(function() {
-    console.log('Document ready, initializing visualization');
-    
-    // Setup sticky header navigation
     setupStickyHeader();
     
-    // Load data and create bubbles
     loadDataFromGoogleSheets();
     
-    // Handle window resize
     window.addEventListener('resize', handleResize);
     
-    // Clean up on page unload
     window.addEventListener('beforeunload', () => {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
     });
     
-    // Remove the duplicate event listener code from dataviz.html
-    // by setting a global flag
     window.tooltipSetupComplete = true;
-});// Helper function to check for bubble collisions
+});
+
 function checkBubbleCollision(bubble1, bubble2) {
-    // Get positions and sizes
     const pos1X = parseFloat(bubble1.dataset.posX) + parseFloat(bubble1.dataset.size) / 2;
     const pos1Y = parseFloat(bubble1.dataset.posY) + parseFloat(bubble1.dataset.size) / 2;
     const pos2X = parseFloat(bubble2.dataset.posX) + parseFloat(bubble2.dataset.size) / 2;
     const pos2Y = parseFloat(bubble2.dataset.posY) + parseFloat(bubble2.dataset.size) / 2;
     
-    // Calculate distance between centers
     const dx = pos2X - pos1X;
     const dy = pos2Y - pos1Y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Sum of radii
     const radius1 = parseFloat(bubble1.dataset.size) / 2;
     const radius2 = parseFloat(bubble2.dataset.size) / 2;
     const minDistance = radius1 + radius2;
     
-    // Check if bubbles are colliding
     if (distance < minDistance) {
         return {
             colliding: true,
@@ -152,50 +125,40 @@ function checkBubbleCollision(bubble1, bubble2) {
     return { colliding: false };
 }
 
-// Helper function to resolve bubble collision
 function resolveBubbleCollision(bubble1, bubble2, collisionInfo) {
-    // Get velocities
     let vel1X = parseFloat(bubble1.dataset.velX);
     let vel1Y = parseFloat(bubble1.dataset.velY);
     let vel2X = parseFloat(bubble2.dataset.velX);
     let vel2Y = parseFloat(bubble2.dataset.velY);
     
-    // Get positions
     let pos1X = parseFloat(bubble1.dataset.posX);
     let pos1Y = parseFloat(bubble1.dataset.posY);
     let pos2X = parseFloat(bubble2.dataset.posX);
     let pos2Y = parseFloat(bubble2.dataset.posY);
     
-    // Get sizes and masses (mass proportional to area/size)
     const size1 = parseFloat(bubble1.dataset.size);
     const size2 = parseFloat(bubble2.dataset.size);
     const mass1 = size1 * size1;
     const mass2 = size2 * size2;
     
-    // Normalize collision vector
     const nx = collisionInfo.dx / collisionInfo.distance;
     const ny = collisionInfo.dy / collisionInfo.distance;
     
-    // Relative velocity along collision normal
     const dvx = vel2X - vel1X;
     const dvy = vel2Y - vel1Y;
     const dotProduct = nx * dvx + ny * dvy;
     
-    // Don't resolve if bubbles are moving away from each other
     if (dotProduct > 0) return;
     
-    // Calculate impulse scalar
     const impulseScalar = (-(1 + COLLISION_DAMPING) * dotProduct) / 
                           (1/mass1 + 1/mass2);
     
-    // Apply impulse
     vel1X -= impulseScalar * nx / mass1;
     vel1Y -= impulseScalar * ny / mass1;
     vel2X += impulseScalar * nx / mass2;
     vel2Y += impulseScalar * ny / mass2;
     
-    // Resolve overlap - move bubbles apart
-    const percent = 0.2; // Penetration resolution percentage
+    const percent = 0.2;
     const correction = collisionInfo.overlap * percent;
     
     pos1X -= nx * correction * (mass2 / (mass1 + mass2));
@@ -203,7 +166,6 @@ function resolveBubbleCollision(bubble1, bubble2, collisionInfo) {
     pos2X += nx * correction * (mass1 / (mass1 + mass2));
     pos2Y += ny * correction * (mass1 / (mass1 + mass2));
     
-    // Update bubble data
     bubble1.dataset.velX = vel1X;
     bubble1.dataset.velY = vel1Y;
     bubble1.dataset.posX = pos1X;
@@ -214,30 +176,25 @@ function resolveBubbleCollision(bubble1, bubble2, collisionInfo) {
     bubble2.dataset.posX = pos2X;
     bubble2.dataset.posY = pos2Y;
     
-    // Apply new positions
     bubble1.style.left = `${pos1X}px`;
     bubble1.style.top = `${pos1Y}px`;
     bubble2.style.left = `${pos2X}px`;
     bubble2.style.top = `${pos2Y}px`;
 }
 
-// Google Sheets API constants
 const SPREADSHEET_ID = '1C-iegnutKxu5hfmqd07HA5081Ie_pfdxc0a-B_7jezI';
 const API_KEY = 'AIzaSyCJ0TaH0vypcPDs9vXUbobqXaHfc_AlnmI';
 const SHEET_RANGE = 'Sheet1!A2:F';
 
-// Data storage
 let entriesData = [];
 
-// Bubble configuration
-const BUBBLE_MIN_SIZE = 20;  // Size for rating 1
-const BUBBLE_MAX_SIZE = 110; // Size for rating 5
+const BUBBLE_MIN_SIZE = 20;
+const BUBBLE_MAX_SIZE = 110;
 const BUBBLE_SPEED_MIN = 0.001;
 const BUBBLE_SPEED_MAX = 1;
-const CENTER_ATTRACTION_STRENGTH = 0.00001; // How strongly bubbles are attracted to center
-const COLLISION_DAMPING = 1;      // Energy loss in collisions
+const CENTER_ATTRACTION_STRENGTH = 0.00001;
+const COLLISION_DAMPING = 1;
 
-// Bubble color constants based on collection-styles.css
 const BEST_MOMENT_COLORS = {
     1: 'rgba(59, 255, 95, 0.2)',
     2: 'rgba(59, 255, 95, 0.325)',
@@ -254,13 +211,10 @@ const WORST_MOMENT_COLORS = {
     5: 'rgba(147, 219, 255, 0.9)'
 };
 
-// Animation frame ID for cancellation
 let animationFrameId = null;
 
-// Tooltip element
 let tooltip = null;
 
-// Function to parse date from Google Sheets (expected format: MM/DD/YYYY HH:MM:SS)
 function parseSheetDate(dateString) {
     if (!dateString) return { date: formatDate(), time: formatTime() };
     
@@ -268,19 +222,17 @@ function parseSheetDate(dateString) {
         const parts = dateString.split(' ');
         if (parts.length >= 2) {
             return {
-                date: parts[0], // MM/DD/YYYY
-                time: parts[1]  // HH:MM:SS
+                date: parts[0],
+                time: parts[1]
             };
         }
     } catch (e) {
         console.error('Error parsing date:', e);
     }
     
-    // Fallback to current date/time
     return { date: formatDate(), time: formatTime() };
 }
 
-// Function to format the current date in MM/DD/YYYY format
 function formatDate() {
     const now = new Date();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -289,7 +241,6 @@ function formatDate() {
     return `${month}/${day}/${year}`;
 }
 
-// Function to format the current time in HH:MM:SS format
 function formatTime() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
@@ -298,7 +249,6 @@ function formatTime() {
     return `${hours}:${minutes}:${seconds}`;
 }
 
-// Function to load data from Google Sheets
 function loadDataFromGoogleSheets() {
     const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_RANGE}?key=${API_KEY}`;
     
@@ -315,19 +265,14 @@ function loadDataFromGoogleSheets() {
         })
         .then(data => {
             const rows = data.values || [];
-            console.log("Data loaded from Google Sheets:", rows);
             
-            // Reset array
             entriesData = [];
             
-            // Process the data
             rows.forEach(row => {
-                // Check if we have a proper row with enough elements
                 if (row && row.length >= 5) {
                     const dateTimeObj = parseSheetDate(row[0] || '');
                     const location = row.length >= 6 ? row[5] : "UNKNOWN";
                     
-                    // Best moment (column B/index 1)
                     if (row[1] && row[1].trim() !== '' && row[2] && !isNaN(parseInt(row[2]))) {
                         entriesData.push({
                             type: 'best',
@@ -339,7 +284,6 @@ function loadDataFromGoogleSheets() {
                         });
                     }
                     
-                    // Worst moment (column D/index 3)
                     if (row[3] && row[3].trim() !== '' && row[4] && !isNaN(parseInt(row[4]))) {
                         entriesData.push({
                             type: 'worst',
@@ -353,23 +297,15 @@ function loadDataFromGoogleSheets() {
                 }
             });
             
-            console.log("Processed data for visualization:", entriesData);
-            
-            // Create bubbles
             createBubbles();
         })
         .catch(error => {
             console.error('Error fetching data from Google Sheets:', error);
-            // Fallback to mock data if API fails
-            console.log("Falling back to mock data");
             useMockData();
-            
-            // Create bubbles with mock data
             createBubbles();
         });
 }
 
-// Fallback mock data in case the API fails
 function useMockData() {
     entriesData = [
         { 
@@ -455,16 +391,14 @@ function useMockData() {
     ];
 }
 
-// Function to get bubble color based on type and rating
 function getBubbleColor(type, rating) {
     if (type === 'best') {
-        return BEST_MOMENT_COLORS[rating] || BEST_MOMENT_COLORS[3]; // Default to rating 3 if not found
+        return BEST_MOMENT_COLORS[rating] || BEST_MOMENT_COLORS[3];
     } else {
-        return WORST_MOMENT_COLORS[rating] || WORST_MOMENT_COLORS[3]; // Default to rating 3 if not found
+        return WORST_MOMENT_COLORS[rating] || WORST_MOMENT_COLORS[3];
     }
 }
 
-// Function to calculate statistics from entries data
 function calculateDataStats(data) {
     if (!data || data.length === 0) {
         return {
@@ -480,11 +414,9 @@ function calculateDataStats(data) {
         };
     }
     
-    // Split by type
     const bestMoments = data.filter(entry => entry.type === 'best');
     const worstMoments = data.filter(entry => entry.type === 'worst');
     
-    // Calculate average ratings
     const avgBestRating = bestMoments.length > 0 
         ? bestMoments.reduce((sum, entry) => sum + entry.rating, 0) / bestMoments.length 
         : 0;
@@ -493,7 +425,6 @@ function calculateDataStats(data) {
         ? worstMoments.reduce((sum, entry) => sum + entry.rating, 0) / worstMoments.length 
         : 0;
     
-    // Find max ratings
     const maxBestRating = bestMoments.length > 0 
         ? Math.max(...bestMoments.map(entry => entry.rating)) 
         : 0;
@@ -502,7 +433,6 @@ function calculateDataStats(data) {
         ? Math.max(...worstMoments.map(entry => entry.rating)) 
         : 0;
     
-    // Find most common locations
     const bestLocationCounts = {};
     bestMoments.forEach(entry => {
         const loc = entry.location || "UNKNOWN";
@@ -515,15 +445,14 @@ function calculateDataStats(data) {
         worstLocationCounts[loc] = (worstLocationCounts[loc] || 0) + 1;
     });
     
-    // Convert to arrays and sort by count
     const bestLocations = Object.entries(bestLocationCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 2) // Top 2 locations
+        .slice(0, 2)
         .map(([loc, count]) => ({ loc, count }));
         
     const worstLocations = Object.entries(worstLocationCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 2) // Top 2 locations
+        .slice(0, 2)
         .map(([loc, count]) => ({ loc, count }));
     
     return {
@@ -539,12 +468,9 @@ function calculateDataStats(data) {
     };
 }
 
-// Function to create and update stats overlay
 function createStatsOverlay() {
-    // Calculate stats first
     const stats = calculateDataStats(entriesData);
     
-    // Create overlay element if it doesn't exist
     let statsOverlay = document.getElementById('stats-overlay');
     if (!statsOverlay) {
         statsOverlay = document.createElement('div');
@@ -553,7 +479,6 @@ function createStatsOverlay() {
         document.body.appendChild(statsOverlay);
     }
     
-    // Create content based on stats
     let bestLocationsText = stats.bestLocations.length > 0 
         ? stats.bestLocations.map(l => `${l.loc} (${l.count})`).join(', ')
         : 'N/A';
@@ -608,50 +533,40 @@ function createStatsOverlay() {
     `;
 }
 
-// Function to create floating bubbles
 function createBubbles() {
     const bestContainer = document.getElementById('best-bubbles-canvas');
     const worstContainer = document.getElementById('worst-bubbles-canvas');
     
-    // Clear existing bubbles
     bestContainer.innerHTML = '';
     worstContainer.innerHTML = '';
     
-    // Create tooltip if it doesn't exist
     if (!tooltip) {
         tooltip = document.createElement('div');
         tooltip.className = 'bubble-tooltip';
         document.body.appendChild(tooltip);
     }
     
-    // Create bubbles for each entry
     entriesData.forEach((entry, index) => {
         const bubble = document.createElement('div');
         bubble.className = entry.type === 'best' ? 'best-bubble' : 'worst-bubble';
         
-        // Calculate bubble size based on rating (1-5)
         const size = BUBBLE_MIN_SIZE + ((BUBBLE_MAX_SIZE - BUBBLE_MIN_SIZE) * (entry.rating - 1) / 4);
         bubble.style.width = `${size}px`;
         bubble.style.height = `${size}px`;
         
-        // Set bubble color based on type and rating
         bubble.style.backgroundColor = getBubbleColor(entry.type, entry.rating);
         
-        // Set initial random position
         const containerWidth = entry.type === 'best' ? bestContainer.clientWidth : worstContainer.clientWidth;
         const containerHeight = entry.type === 'best' ? bestContainer.clientHeight : worstContainer.clientHeight;
         
-        // Make sure bubbles are placed within view
         const leftPos = Math.random() * (containerWidth - size);
         const topPos = Math.random() * (containerHeight - size);
         
         bubble.style.left = `${leftPos}px`;
         bubble.style.top = `${topPos}px`;
         
-        // Set inner text (rating)
         bubble.textContent = entry.rating;
         
-        // Set data attributes for tooltip
         bubble.dataset.content = entry.content;
         bubble.dataset.date = entry.date;
         bubble.dataset.time = entry.time;
@@ -661,28 +576,23 @@ function createBubbles() {
         bubble.dataset.size = size;
         bubble.dataset.type = entry.type;
         
-        // Add physics data with random velocities
         const speedFactor = BUBBLE_SPEED_MIN + Math.random() * (BUBBLE_SPEED_MAX - BUBBLE_SPEED_MIN);
         bubble.dataset.velX = (Math.random() * 2 - 1) * speedFactor;
         bubble.dataset.velY = (Math.random() * 2 - 1) * speedFactor;
         bubble.dataset.posX = leftPos;
         bubble.dataset.posY = topPos;
         
-        // IMPORTANT: Add this to mark that the bubble has been created properly with all data
         bubble.dataset.initialized = 'true';
         
-        // IMPORTANT: We'll attach the event listeners directly here and mark them
         bubble.dataset.listenersAdded = 'true';
         
         bubble.addEventListener('mouseenter', function(e) {
-            console.log(`Bubble entered: ${entry.type} - ${entry.content}`);
             showTooltip(e);
         });
         
         bubble.addEventListener('mousemove', moveTooltip);
         bubble.addEventListener('mouseleave', hideTooltip);
         
-        // Add to appropriate container
         if (entry.type === 'best') {
             bestContainer.appendChild(bubble);
         } else {
@@ -690,19 +600,13 @@ function createBubbles() {
         }
     });
     
-    // Create stats overlay
     createStatsOverlay();
     
-    // Start animation
     startFloatingAnimation();
 }
 
-// Function to show tooltip on bubble hover
 function showTooltip(event) {
     const bubble = event.target;
-    
-    // Debug to help identify any issues
-    console.log('Bubble hover:', bubble.className, bubble.dataset.content);
     
     tooltip.innerHTML = `
         <p>${bubble.dataset.content}</p><br>
@@ -712,12 +616,11 @@ function showTooltip(event) {
         Rating: ${bubble.dataset.rating}/5
     `;
     
-    tooltip.style.opacity = '1';  // Set opacity directly
+    tooltip.style.opacity = '1';
     tooltip.classList.add('visible');
     moveTooltip(event);
 }
 
-// Function to move tooltip with cursor
 function moveTooltip(event) {
     const x = event.clientX + 10;
     const y = event.clientY + 10;
@@ -726,15 +629,12 @@ function moveTooltip(event) {
     tooltip.style.top = `${y}px`;
 }
 
-// Function to hide tooltip
 function hideTooltip() {
-    tooltip.style.opacity = '0';  // Set opacity directly
+    tooltip.style.opacity = '0';
     tooltip.classList.remove('visible');
 }
 
-// Function to start floating animation with physics, bouncing and center attraction
 function startFloatingAnimation() {
-    // Cancel existing animation if any
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
     }
@@ -743,100 +643,77 @@ function startFloatingAnimation() {
     const worstBubbles = document.querySelectorAll('.worst-bubble');
     const bubbles = [...bestBubbles, ...worstBubbles];
     
-    console.log(`Animation starting with ${bestBubbles.length} best bubbles and ${worstBubbles.length} worst bubbles`);
-    
     const bestContainer = document.getElementById('best-bubbles-canvas');
     const worstContainer = document.getElementById('worst-bubbles-canvas');
     
     function animate() {
-        // First update all bubble positions based on velocities
         bubbles.forEach(bubble => {
-            // Skip bubbles that aren't fully initialized
             if (!bubble.dataset.initialized) return;
             
-            // Get current position and velocity
             let posX = parseFloat(bubble.dataset.posX);
             let posY = parseFloat(bubble.dataset.posY);
             let velX = parseFloat(bubble.dataset.velX);
             let velY = parseFloat(bubble.dataset.velY);
             const size = parseFloat(bubble.dataset.size);
             
-            // Get container dimensions (each bubble type has its own container)
             const container = bubble.classList.contains('best-bubble') ? bestContainer : worstContainer;
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
             
-            // Calculate center of the container
             const centerX = containerWidth / 2;
             const centerY = containerHeight / 2;
             
-            // Calculate bubble center
             const bubbleCenterX = posX + size / 2;
             const bubbleCenterY = posY + size / 2;
             
-            // Calculate vector from bubble to center
             const dx = centerX - bubbleCenterX;
             const dy = centerY - bubbleCenterY;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            // Apply attraction to center
-            if (distance > 5) { // Only attract if not too close to center
+            if (distance > 5) {
                 velX += dx * CENTER_ATTRACTION_STRENGTH;
                 velY += dy * CENTER_ATTRACTION_STRENGTH;
             }
             
-            // Update position with velocity
             posX += velX;
             posY += velY;
             
-            // Bounce off container edges
-            // Right edge
             if (posX + size > containerWidth) {
                 posX = containerWidth - size;
-                velX = -velX * 0.8; // Add damping factor
+                velX = -velX * 0.8;
             }
-            // Left edge
             if (posX < 0) {
                 posX = 0;
                 velX = -velX * 0.8;
             }
-            // Bottom edge
             if (posY + size > containerHeight) {
                 posY = containerHeight - size;
                 velY = -velY * 0.8;
             }
-            // Top edge
             if (posY < 0) {
                 posY = 0;
                 velY = -velY * 0.8;
             }
             
-            // Apply slight drag/friction
             velX *= 0.99;
             velY *= 0.99;
             
-            // Add small random movement to keep things interesting
             velX += (Math.random() - 0.5) * 0.1;
             velY += (Math.random() - 0.5) * 0.1;
             
-            // Update bubble data
             bubble.dataset.posX = posX;
             bubble.dataset.posY = posY;
             bubble.dataset.velX = velX;
             bubble.dataset.velY = velY;
             
-            // Apply new position
             bubble.style.left = `${posX}px`;
             bubble.style.top = `${posY}px`;
         });
         
-        // Then check for and resolve collisions between bubbles
         for (let i = 0; i < bubbles.length; i++) {
-            // Skip bubbles that aren't fully initialized
             if (!bubbles[i].dataset.initialized) continue;
             
             for (let j = i + 1; j < bubbles.length; j++) {
-                // Skip bubbles that aren't fully initialized
                 if (!bubbles[j].dataset.initialized) continue;
                 
                 const collision = checkBubbleCollision(bubbles[i], bubbles[j]);
@@ -846,10 +723,8 @@ function startFloatingAnimation() {
             }
         }
         
-        // Continue animation
         animationFrameId = requestAnimationFrame(animate);
     }
     
-    // Start the animation
     animate();
 }

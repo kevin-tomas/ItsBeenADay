@@ -1,14 +1,12 @@
-/* Collection page specific styles */
 .index-container {
     width: 100%;
     margin: 0;
     padding: 0;
     background-color: white;
     position: relative;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden;
 }
 
-/* Set column widths */
 .index-table col.col-metadata { width: 15%; }
 .index-table col.col-best { width: 42.5%; }
 .index-table col.col-worst { width: 42.5%; }
@@ -19,25 +17,21 @@
     table-layout: fixed;
 }
 
-/* Make table content scrollable - adjusted for no header */
 .table-container {
-    max-height: calc(100vh - 65px); /* Adjust for sticky header height */
+    max-height: calc(100vh - 65px);
     overflow-y: auto;
     position: relative;
     padding-bottom: 82px;
 }
 
-/* Dotted line between rows */
 .index-table tbody tr {
     border-bottom: 1px dotted #000;
 }
 
-/* First row gets a top border since the header is gone */
 .index-table tbody tr:first-child {
     border-top: 0px dotted #000;
 }
 
-/* Ensure no vertical lines */
 .index-table td {
     border-left: none;
     border-right: none;
@@ -46,7 +40,6 @@
     text-align: left;
 }
 
-/* Give more space to best and worst columns */
 .index-table td:nth-child(2),
 .index-table td:nth-child(3) {
     padding: 10px 30px 10px 10px;
@@ -54,7 +47,6 @@
     width: 42.5%;
 }
 
-/* Style for date-time and location divs */
 .date-time, .location {
     font-weight: regular;
     align-items: center;
@@ -93,15 +85,13 @@
     vertical-align: middle;
 }
 
-/* Style for rating badges that appear at the front of content */
 .rating-badge-front {
     margin-left: 0;
     margin-right: 20px;
 }
 
-/* Best moment rating background colors - yellow gradient */
 td .best-moment {
-    background-color: rgba(59, 255, 95, 0.55); /* Default rating 3 */
+    background-color: rgba(59, 255, 95, 0.55);
 }
 
 td .best-moment[data-rating="1"] {
@@ -124,9 +114,8 @@ td .best-moment[data-rating="5"] {
     background-color: rgba(59, 255, 95, 0.9);
 }
 
-/* Worst moment rating background colors - blue gradient */
 td .worst-moment {
-    background-color: rgba(147, 219, 255, 0.55); /* Default rating 3 */
+    background-color: rgba(147, 219, 255, 0.55);
 }
 
 td .worst-moment[data-rating="1"] {
@@ -149,7 +138,6 @@ td .worst-moment[data-rating="5"] {
     background-color: rgba(147, 219, 255, 0.9);
 }
 
-/* Styling for sorting controls */
 .sorting-controls {
     display: flex;
     justify-content: right;
@@ -193,31 +181,26 @@ td .worst-moment[data-rating="5"] {
     opacity: 0.3;
 }
 
-/* Active sort state */
 .sort-button.sort-active {
     background-color: #e8f4ff;
     border-color: #000000;
     font-weight: 500;
 }
 
-/* For ascending sort (oldest first or lowest rating first) */
 .sort-button.sort-active.sort-asc .arrow-up {
     opacity: 1;
     color: #0066cc;
 }
 
-/* For descending sort (newest first or highest rating first) */
 .sort-button.sort-active.sort-desc .arrow-down {
     opacity: 1;
     color: #0066cc;
 }
 
-/* Adjust table container height to accommodate sorting controls */
 .table-container {
-    max-height: calc(100vh - 110px); /* Adjust for sticky header and sorting controls */
+    max-height: calc(100vh - 110px);
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .sorting-controls {
         flex-direction: column;
@@ -231,7 +214,7 @@ td .worst-moment[data-rating="5"] {
     }
     
     .table-container {
-        max-height: calc(100vh - 200px); /* Adjust for smaller screens */
+        max-height: calc(100vh - 200px);
     }
 }
 
@@ -246,7 +229,6 @@ td .worst-moment[data-rating="5"] {
     }
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .index-table {
         font-size: 14px;
