@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>It's Been A Day - Visualized</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dataviz-styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <!-- Sticky header (duplicated from other pages) -->
+    <header class="sticky-header">
+        <h1 class="site-title">It's Been A Day</h1>
+        <div class="navigation">
+            <div class="nav-container">
+                <div class="pill"></div>
+                <div class="nav-item" data-page="paired">PAIRED</div>
+                <div class="nav-item" data-page="index">INDEX</div>
+                <div class="nav-item active" data-page="visualized">VISUALIZED</div>
+            </div>
+            <div class="action-buttons">
+                <div class="action-button" data-action="submit">SUBMIT</div>
+                <div class="action-button" data-action="about">ABOUT</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="dataviz-container">
+        <div class="bubble-container">
+            <div id="best-bubbles-canvas"></div>
+            <div id="worst-bubbles-canvas"></div>
+        </div>
+    </div>
+
+    <script>
+    // Simple check to ensure tooltips work
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking if tooltip functionality is initialized');
+        setTimeout(function() {
+            const tooltips = document.querySelectorAll('.best-bubble, .worst-bubble');
+            console.log(`Found ${tooltips.length} bubbles to check`);
+            
+            tooltips.forEach(bubble => {
+                const hasListeners = bubble.getAttribute('data-listeners-added');
+                if (!hasListeners) {
+                    console.log(`Adding event listeners to bubble: ${bubble.className}`);
+                    bubble.addEventListener('mouseenter', function(e) {
+                        console.log(`Hover on ${bubble.className}: ${bubble.dataset.content}`);
+                        const tooltip = document.querySelector('.bubble-tooltip');
+                        if (tooltip) {
+                            tooltip.innerHTML = `
+                                <strong>${bubble.dataset.content}</strong><br>
+                                Location: ${bubble.dataset.location}<br>
+                                Date: ${bubble.dataset.date}<br>
+                                Time: ${bubble.dataset.time}<br>
+                                Rating: ${bubble.dataset.rating}/5
+                            `;
+                            tooltip.classList.add('visible');
+                            tooltip.style.left = `${e.clientX + 10}px`;
+                            tooltip.style.top = `${e.clientY + 10}px`;
+                        }
+                    });
+                    
+                    bubble.addEventListener('mousemove', function(e) {
+                        const tooltip = document.querySelector('.bubble-tooltip');
+                        if (tooltip && tooltip.classList.contains('visible')) {
+                            tooltip.style.left = `${e.clientX + 10}px`;
+                            tooltip.style.top = `${e.clientY + 10}px`;
+                        }
+                    });
+                    
+                    bubble.addEventListener('mouseleave', function() {
+                        const tooltip = document.querySelector('.bubble-tooltip');
+                        if (tooltip) {
+                            tooltip.classList.remove('visible');
+                        }
+                    });
+                    
+                    bubble.setAttribute('data-listeners-added', 'true');
+                }
+            });
+        }, 1000); // Wait for bubbles to be created
+    });
+    </script>
+    
+    <script src="dataviz-script.js"></script>
+</body>
+</html>

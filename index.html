@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>It's Been A Day</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <!-- New sticky header -->
+    <header class="sticky-header">
+        <h1 class="site-title">It's Been A Day</h1>
+        <div class="navigation">
+            <div class="nav-container">
+                <div class="pill"></div>
+                <div class="nav-item active" data-page="paired">PAIRED</div>
+                <div class="nav-item" data-page="index">INDEX</div>
+                <div class="nav-item" data-page="visualized">VISUALIZED</div>
+            </div>
+            <div class="action-buttons">
+                <div class="action-button" data-action="submit">SUBMIT</div>
+                <div class="action-button" data-action="about">ABOUT</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="half left" data-rating="3">
+            <div class="gradient-animation"></div>
+            <div class="section-header">
+                <h2>WHAT WAS THE BEST PART OF YOUR DAY?</h2>
+            </div>
+            <div class="entry-content">
+                <div class="loading"><div class="spinner"></div></div>
+                <div class="entry">
+                    <p class="entry-text">my english teacher canceled class</p>
+                </div>
+            </div>
+            <div class="entry-metadata">
+                <p>LOCATION: <span class="location-field">UNKNOWN</span></p>
+                <p>DATE: <span class="date-field">04/16/2025</span></p>
+                <p>TIME: <span class="time-field">07:16:23</span></p>
+                <p>DAY RATING: <span class="rating-field">3</span>/5</p>
+            </div>
+        </div>
+        
+        <div class="half right" data-rating="3">
+            <div class="gradient-animation"></div>
+            <div class="section-header">
+                <h2>WHAT WAS THE WORST PART OF YOUR DAY?</h2>
+            </div>
+            <div class="entry-content">
+                <div class="loading"><div class="spinner"></div></div>
+                <div class="entry">
+                    <p class="entry-text">i now can't fall back asleep. woke up for nothing and don't have another class until 12:30 (it's currently 9:10 here).</p>
+                </div>
+            </div>
+            <div class="entry-metadata">
+                <p>LOCATION: <span class="location-field">UNKNOWN</span></p>
+                <p>DATE: <span class="date-field">04/16/2025</span></p>
+                <p>TIME: <span class="time-field">07:16:23</span></p>
+                <p>DAY RATING: <span class="rating-field">3</span>/5</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

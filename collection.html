@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>It's Been A Day - Collection</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="collection-styles.css">
+    <link rel="stylesheet" href="sorting-styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    
+    <!-- New sticky header -->
+    <header class="sticky-header">
+        <h1 class="site-title">It's Been A Day</h1>
+        <div class="navigation">
+            <div class="nav-container">
+                <div class="pill"></div>
+                <div class="nav-item" data-page="paired">PAIRED</div>
+                <div class="nav-item active" data-page="index">INDEX</div>
+                <div class="nav-item" data-page="visualized">VISUALIZED</div>
+            </div>
+            <div class="action-buttons">
+                <div class="action-button" data-action="submit">SUBMIT</div>
+                <div class="action-button" data-action="about">ABOUT</div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- New sorting controls -->
+    <div class="sorting-controls">
+        <div class="sort-button" data-sort="date" title="Sort by Date">
+            <span class="sort-icon"></span> Date
+            <span class="sort-arrows">
+                <span class="arrow-up">▲</span>
+                <span class="arrow-down">▼</span>
+            </span>
+        </div>
+        <div class="sort-button" data-sort="bestRating" title="Sort by Best Rating">
+            <span class="sort-icon"></span> Best 
+            <span class="sort-arrows">
+                <span class="arrow-up">▲</span>
+                <span class="arrow-down">▼</span>
+            </span>
+        </div>
+        <div class="sort-button" data-sort="worstRating" title="Sort by Worst Rating">
+            <span class="sort-icon"></span> Worst 
+            <span class="sort-arrows">
+                <span class="arrow-up">▲</span>
+                <span class="arrow-down">▼</span>
+            </span>
+        </div>
+    </div>
+    
+    <div class="index-container">
+        <div class="table-container">
+            <table class="index-table">
+                <colgroup>
+                    <col class="col-metadata">
+                    <col class="col-best">
+                    <col class="col-worst">
+                </colgroup>
+                <tbody id="index-entries">
+                    <!-- Table entries will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="collection-script.js"></script>
+</body>
+</html>
